@@ -5,6 +5,7 @@ import numpy as np
 import sqlite3
 import seaborn as sns
 import matplotlib.pyplot as plt
+import streamlit_shadcn_ui as ui
 
 st.set_page_config(page_title="Data Analysis App", layout="wide")
 st.title("Data Analysis & EDA Dashboard")
@@ -34,6 +35,36 @@ elif uploaded_file:
 else:
     st.info("Please upload a file or use the demo dataset to get started.")
     st.stop()
+
+# -----------------------------
+# KPI / Summary Panel
+# -----------------------------
+with st.expander("Dataset Summary / KPIs", expanded=True):
+    num_rows, num_cols = df_cleaned.shape
+    missing_total = df_cleaned.isnull().sum().sum()
+    duplicate_count = df_cleaned.duplicated().sum()
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Rows", num_rows)
+    col2.metric("Columns", num_cols)
+    col3.metric("Total Missing Values", missing_total)
+    col4.metric("Duplicate Rows", duplicate_count)
+
+    # Numeric column overview
+    numeric_cols = df_cleaned.select_dtypes(include='number').columns.tolist()
+    if numeric_cols:
+        st.write("**Numeric Columns Overview**")
+        numeric_summary = pd.DataFrame({
+            "Column": numeric_cols,
+            "Mean": df_cleaned[numeric_cols].mean().round(2),
+            "Median": df_cleaned[numeric_cols].median().round(2),
+            "Std Dev": df_cleaned[numeric_cols].std().round(2),
+            "Min": df_cleaned[numeric_cols].min(),
+            "Max": df_cleaned[numeric_cols].max()
+        })
+        ui.table(data=numeric_summary, maxHeight=300)
+
+
 
 # -----------------------------
 # Dataset Preview
